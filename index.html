@@ -1,440 +1,585 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Github, Linkedin, Mail, ExternalLink, BookOpen, Code, Users } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cary Darwin — Computational Chemist</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='24' font-size='24'>⚛</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #0a0f1a;
+    --bg-mid: #0e1628;
+    --bg-card: rgba(15,23,42,0.6);
+    --bg-card-subtle: rgba(15,23,42,0.4);
+    --cyan: #22d3ee;
+    --cyan-dim: rgba(34,211,238,0.08);
+    --cyan-border: rgba(34,211,238,0.12);
+    --blue: #3b82f6;
+    --blue-light: #60a5fa;
+    --amber: #f59e0b;
+    --text-bright: #f1f5f9;
+    --text-primary: #cbd5e1;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-faint: #475569;
+    --border: rgba(148,163,184,0.08);
+    --border-light: rgba(148,163,184,0.12);
+    --card-shadow: 0 2px 16px rgba(0,0,0,0.2);
+    --hover-shadow: 0 8px 32px rgba(34,211,238,0.06);
+  }
 
-/* ─────────────────────────────────────────────
-   Minimal QR Code generator (Mode: Byte, ECC: L, Version auto)
-   Generates a boolean matrix from a URL string.
-   ───────────────────────────────────────────── */
-function generateQRMatrix(text) {
-  // Using canvas-based generation with a lightweight approach
-  // We'll use a pre-computed approach for the specific URL
-  const url = text;
-  const size = 25; // QR version 2 is 25x25
-  
-  // Since we can't import heavy QR libs in this artifact context,
-  // we'll render via an <img> tag pointing to a public QR API
-  return null; // Signal to use image-based approach
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-function QRCode({ url, size = 200, darkColor = '#0e1a2b', lightColor = '#ffffff' }) {
-  // Use a reliable public QR code API
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&color=${darkColor.replace('#','')}&bgcolor=${lightColor.replace('#','')}&margin=0&format=svg`;
-  
-  return (
-    <img 
-      src={qrUrl} 
-      alt={`QR code for ${url}`}
-      width={size} 
-      height={size}
-      style={{ display: 'block', borderRadius: '4px' }}
-    />
-  );
-}
+  body {
+    font-family: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(145deg, var(--bg-deep) 0%, var(--bg-mid) 40%, #111d2e 70%, #0d1520 100%);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
 
-export default function Portfolio() {
-  const [activeSection, setActiveSection] = useState('');
-  const portfolioUrl = "https://phaedrusd.github.io";
+  .heading { font-family: 'Outfit', sans-serif; }
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = ['work', 'education', 'publications', 'teaching'];
-      for (const id of sections.reverse()) {
-        const el = document.getElementById(id);
-        if (el && window.scrollY >= el.offsetTop - 120) {
-          setActiveSection(id);
-          break;
-        }
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  /* ───── NAV ───── */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background: rgba(10,15,26,0.78);
+  }
+  .nav-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 56px;
+  }
+  .nav-brand {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 1.5rem; }
+  .nav-links a {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+    padding: 0.25rem 0;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-links a:hover,
+  .nav-links a.active {
+    color: var(--cyan);
+    border-bottom-color: var(--cyan);
+  }
 
-  const navLink = (href, label) => (
-    <a 
-      href={`#${href}`} 
-      onClick={(e) => {
-        e.preventDefault();
-        document.getElementById(href)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }}
-      className={`transition text-sm font-medium ${
-        activeSection === href ? 'text-cyan-400' : 'text-slate-300 hover:text-cyan-400'
-      }`}
-    >
-      {label}
-    </a>
-  );
+  /* ───── LAYOUT ───── */
+  .container { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; }
+  .section { padding: 3.5rem 0; }
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-light) 30%, var(--border-light) 70%, transparent);
+  }
 
-  return (
-    <div className="min-h-screen" style={{
-      background: 'linear-gradient(145deg, #0a0f1a 0%, #0e1628 40%, #111d2e 70%, #0d1520 100%)',
-      fontFamily: "'Source Sans 3', 'Segoe UI', system-ui, sans-serif",
-    }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
-        
-        .heading-font { font-family: 'Outfit', sans-serif; }
-        
-        .glow-border {
-          position: relative;
-        }
-        .glow-border::before {
-          content: '';
-          position: absolute;
-          inset: -1px;
-          border-radius: inherit;
-          background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(59,130,246,0.08), transparent);
-          z-index: -1;
-          pointer-events: none;
-        }
-        
-        .card-hover {
-          transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-        }
-        .card-hover:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 32px rgba(34,211,238,0.06);
-        }
-        
-        .fade-in {
-          animation: fadeUp 0.6s ease forwards;
-          opacity: 0;
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .tag-pill {
-          display: inline-block;
-          padding: 3px 10px;
-          border-radius: 100px;
-          font-size: 0.7rem;
-          font-weight: 600;
-          letter-spacing: 0.03em;
-          background: rgba(34,211,238,0.08);
-          color: #67e8f9;
-          border: 1px solid rgba(34,211,238,0.12);
-        }
-        
-        .section-divider {
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(148,163,184,0.12) 30%, rgba(148,163,184,0.12) 70%, transparent);
-        }
-        
-        .qr-container {
-          background: #ffffff;
-          border-radius: 14px;
-          padding: 20px;
-          box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 60px rgba(34,211,238,0.04);
-        }
-        
-        .accent-dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: #22d3ee;
-          display: inline-block;
-          margin-right: 8px;
-          flex-shrink: 0;
-          margin-top: 7px;
-        }
-        
-        * { scrollbar-width: thin; scrollbar-color: #1e293b transparent; }
-      `}</style>
+  /* ───── HERO ───── */
+  .hero {
+    padding: 4.5rem 0 3.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 3rem;
+    align-items: center;
+  }
+  .hero-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 0.6rem;
+  }
+  .hero h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.4rem, 5vw, 3.2rem);
+    font-weight: 800;
+    color: var(--text-bright);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  .hero-subtitle {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 1.2rem;
+  }
+  .hero-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 500px;
+    margin-bottom: 1.5rem;
+  }
+  .hero-buttons { display: flex; gap: 0.65rem; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    border: 1px solid;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-cyan { background: var(--cyan-dim); border-color: rgba(34,211,238,0.2); color: var(--cyan); }
+  .btn-blue { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); color: var(--blue-light); }
+  .btn-ghost { background: rgba(148,163,184,0.05); border-color: var(--border-light); color: var(--text-secondary); }
 
-      {/* ════════ NAV ════════ */}
-      <nav style={{
-        borderBottom: '1px solid rgba(148,163,184,0.08)',
-        backdropFilter: 'blur(12px)',
-        background: 'rgba(10,15,26,0.75)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-      }}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="heading-font text-xl font-bold" style={{
-            background: 'linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}>
-            Cary Darwin
-          </h1>
-          <div className="flex gap-6">
-            {navLink('work', 'Work')}
-            {navLink('education', 'Education')}
-            {navLink('publications', 'Publications')}
-            {navLink('teaching', 'Teaching')}
-          </div>
-        </div>
-      </nav>
+  .btn-icon {
+    width: 17px; height: 17px;
+    display: inline-block;
+    vertical-align: middle;
+  }
 
-      {/* ════════ HERO ════════ */}
-      <section className="max-w-5xl mx-auto px-6 py-20 fade-in">
-        <div className="grid gap-12 items-center" style={{ gridTemplateColumns: '1fr auto' }}>
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <p className="text-sm font-semibold tracking-widest uppercase" style={{ color: '#22d3ee', letterSpacing: '0.18em' }}>
-                PhD Candidate · UT Dallas
-              </p>
-              <h2 className="heading-font text-5xl font-extrabold text-white leading-tight">
-                Computational<br/>Chemist
-              </h2>
-              <p className="text-lg font-medium" style={{ color: '#94a3b8' }}>
-                Molecular Dynamics · Scientific Software · Virus-Like Particles
-              </p>
-            </div>
-            
-            <p className="text-base leading-relaxed" style={{ color: '#94a3b8', maxWidth: '520px' }}>
-              Building software that bridges the gap between complex computational pipelines and usable research tools. Created a GUI that reduced VLP simulation preparation time by 90%.
-            </p>
+  /* ───── QR ───── */
+  .qr-wrap { display: flex; flex-direction: column; align-items: center; }
+  .qr-box {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 60px rgba(34,211,238,0.04);
+  }
+  .qr-box canvas { display: block; }
+  .qr-caption {
+    margin-top: 0.75rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 170px;
+  }
 
-            <div className="flex gap-3 pt-2">
-              <a href="https://github.com/PhaedrusD/eviVLP/tree/main" target="_blank" rel="noopener noreferrer" 
-                 className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition"
-                 style={{ background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.2)', color: '#22d3ee' }}>
-                <Github size={17} /> GitHub
-              </a>
-              <a href="https://linkedin.com/in/cary-darwin-bb2857a7" target="_blank" rel="noopener noreferrer"
-                 className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition"
-                 style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#60a5fa' }}>
-                <Linkedin size={17} /> LinkedIn
-              </a>
-              <a href="mailto:cxd190027@utdallas.edu"
-                 className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition"
-                 style={{ background: 'rgba(148,163,184,0.06)', border: '1px solid rgba(148,163,184,0.12)', color: '#94a3b8' }}>
-                <Mail size={17} /> Email
-              </a>
-            </div>
-          </div>
+  /* ───── SECTION HEADERS ───── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.75rem;
+  }
+  .section-header svg { color: var(--cyan); flex-shrink: 0; }
+  .section-header h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+  .section-sub-header {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 1rem;
+  }
 
-          {/* QR Code */}
-          <div className="flex flex-col items-center">
-            <div className="qr-container">
-              <QRCode url={portfolioUrl} size={180} />
-            </div>
-            <p className="text-xs mt-4 text-center" style={{ color: '#64748b', maxWidth: '180px' }}>
-              Scan to view this portfolio on your phone
-            </p>
-          </div>
-        </div>
-      </section>
+  /* ───── CARDS ───── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+    border-color: rgba(34,211,238,0.15);
+  }
+  .card-subtle {
+    background: var(--bg-card-subtle);
+    border: 1px solid rgba(148,163,184,0.06);
+    border-radius: 12px;
+    padding: 1.2rem;
+  }
+  .card-dashed {
+    background: var(--bg-card-subtle);
+    border: 1px dashed var(--border-light);
+    border-radius: 12px;
+    padding: 1.4rem;
+  }
 
-      <div className="max-w-5xl mx-auto px-6"><div className="section-divider" /></div>
+  .card-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 0.25rem;
+  }
+  .card-meta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--cyan);
+  }
+  .card-meta-muted {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .card-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
 
-      {/* ════════ FEATURED WORK ════════ */}
-      <section id="work" className="max-w-5xl mx-auto px-6 py-16">
-        <div className="flex items-center gap-3 mb-8">
-          <Code style={{ color: '#22d3ee' }} size={24} />
-          <h3 className="heading-font text-2xl font-bold text-white">Featured Work</h3>
-        </div>
+  /* ───── GRID LAYOUTS ───── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .stack { display: flex; flex-direction: column; gap: 1rem; }
 
-        <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 1fr' }}>
-          <div className="p-6 rounded-xl card-hover glow-border" style={{
-            background: 'rgba(15,23,42,0.6)',
-            border: '1px solid rgba(148,163,184,0.08)',
-          }}>
-            <div className="flex items-start justify-between mb-3">
-              <h4 className="heading-font text-lg font-bold text-white">eviVLP — Simulation GUI</h4>
-              <ExternalLink size={16} style={{ color: '#475569' }} />
-            </div>
-            <p className="text-sm leading-relaxed mb-4" style={{ color: '#94a3b8' }}>
-              C++ wxWidgets application orchestrating multi-step computational chemistry pipelines. Integrates VMD, psfgen, CGenFF, and NAMD with an interactive 3D OpenGL molecule viewer featuring atom-picking.
-            </p>
-            <div className="space-y-1.5 mb-4">
-              <p className="text-xs" style={{ color: '#22d3ee' }}><strong>Impact:</strong> 90% reduction in simulation prep time</p>
-              <p className="text-xs" style={{ color: '#22d3ee' }}><strong>Features:</strong> Automated parameterization, template processing, click-based atom selection</p>
-            </div>
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              <span className="tag-pill">C++</span>
-              <span className="tag-pill">wxWidgets</span>
-              <span className="tag-pill">OpenGL</span>
-              <span className="tag-pill">NAMD</span>
-              <span className="tag-pill">VMD</span>
-            </div>
-            <a href="https://github.com/PhaedrusD/eviVLP/tree/main" target="_blank" rel="noopener noreferrer"
-               className="inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: '#22d3ee' }}>
-              View Repository <ExternalLink size={13} />
-            </a>
-          </div>
+  /* ───── TAGS ───── */
+  .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.6rem; }
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 100px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    border: 1px solid var(--cyan-border);
+    letter-spacing: 0.02em;
+  }
 
-          <div className="p-6 rounded-xl" style={{
-            background: 'rgba(15,23,42,0.6)',
-            border: '1px solid rgba(148,163,184,0.08)',
-          }}>
-            <h4 className="heading-font text-lg font-bold text-white mb-4">Research Focus</h4>
-            <div className="space-y-3">
-              {[
-                'Molecular dynamics using CHARMM36/CGenFF force fields',
-                'Novel amino acid parameterization with QM software',
-                'Virus-like particle (VLP) capsid design for therapeutics',
-                'Alpha-Hemolysin nanopore sensing systems',
-                'Coat protein modification & novel residue generation',
-              ].map((item, i) => (
-                <div key={i} className="flex items-start">
-                  <span className="accent-dot" />
-                  <span className="text-sm" style={{ color: '#cbd5e1' }}>{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+  /* ───── ACCENT BULLETS ───── */
+  .bullet-item { display: flex; align-items: flex-start; gap: 0.5rem; }
+  .bullet-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+  .bullet-item span { font-size: 0.85rem; color: var(--text-primary); }
 
-      {/* ════════ TECH STACK ════════ */}
-      <section className="max-w-5xl mx-auto px-6 pb-16">
-        <h3 className="heading-font text-lg font-bold text-white mb-5">Technical Expertise</h3>
-        <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-          {[
-            { title: 'Programming', desc: 'C++, Python, TCL — scientific computation, GUI development (wxWidgets), and workflow automation.' },
-            { title: 'Computational Tools', desc: 'CHARMM, NAMD, VMD, psfgen, CGenFF, ORCA, Q-Chem for quantum mechanical parameterization.' },
-            { title: 'Specializations', desc: 'Molecular dynamics, force field development, scientific visualization, software architecture.' },
-          ].map((item, i) => (
-            <div key={i} className="p-5 rounded-xl" style={{
-              background: 'rgba(15,23,42,0.4)',
-              border: '1px solid rgba(148,163,184,0.06)',
-            }}>
-              <h4 className="text-sm font-bold mb-2" style={{ color: '#22d3ee' }}>{item.title}</h4>
-              <p className="text-xs leading-relaxed" style={{ color: '#94a3b8' }}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+  /* ───── LINKS ───── */
+  .link-cyan {
+    color: var(--cyan);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: opacity 0.2s;
+  }
+  .link-cyan:hover { opacity: 0.8; }
 
-      <div className="max-w-5xl mx-auto px-6"><div className="section-divider" /></div>
+  /* ───── FOOTER ───── */
+  .footer {
+    border-top: 1px solid rgba(148,163,184,0.06);
+    margin-top: 3rem;
+    padding: 2.5rem 0;
+    text-align: center;
+  }
+  .footer p { font-size: 0.75rem; color: var(--text-muted); }
+  .footer a { color: var(--cyan); text-decoration: none; }
+  .footer .faint { color: var(--text-faint); margin-top: 1rem; }
 
-      {/* ════════ EDUCATION ════════ */}
-      <section id="education" className="max-w-5xl mx-auto px-6 py-16">
-        <h3 className="heading-font text-2xl font-bold text-white mb-8">Education</h3>
-        <div className="space-y-4">
-          <div className="p-6 rounded-xl" style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(148,163,184,0.08)' }}>
-            <div className="flex justify-between items-start mb-1">
-              <h4 className="heading-font text-lg font-bold text-white">PhD in Chemistry</h4>
-              <span className="text-sm font-semibold" style={{ color: '#22d3ee' }}>Expected 2026</span>
-            </div>
-            <p className="text-sm mb-2" style={{ color: '#64748b' }}>University of Texas at Dallas — Gassensmith Lab</p>
-            <p className="text-sm" style={{ color: '#94a3b8' }}>Computational chemistry, molecular dynamics simulations, virus-like particle engineering, and scientific software development.</p>
-          </div>
+  /* ───── RESPONSIVE ───── */
+  @media (max-width: 700px) {
+    .hero { grid-template-columns: 1fr; text-align: center; }
+    .hero-desc { margin-left: auto; margin-right: auto; }
+    .hero-buttons { justify-content: center; }
+    .qr-wrap { margin-top: 1rem; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .nav-links { gap: 1rem; }
+    .nav-links a { font-size: 0.78rem; }
+  }
 
-          <div className="p-6 rounded-xl" style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(148,163,184,0.08)' }}>
-            <div className="flex justify-between items-start mb-1">
-              <h4 className="heading-font text-lg font-bold text-white">Bachelor of Science in Biochemistry</h4>
-              <span className="text-sm font-semibold" style={{ color: '#22d3ee' }}>2022</span>
-            </div>
-            <p className="text-sm" style={{ color: '#64748b' }}>University of Texas at Dallas</p>
-          </div>
+  @media print {
+    .nav { display: none; }
+    body { background: #fff; color: #111; }
+  }
+</style>
+</head>
+<body>
 
-          <div className="p-5 rounded-xl" style={{ background: 'rgba(15,23,42,0.4)', border: '1px solid rgba(148,163,184,0.06)' }}>
-            <h4 className="heading-font text-sm font-bold text-white mb-3">Relevant Coursework</h4>
-            <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 1fr' }}>
-              <div>
-                <p className="text-xs font-bold" style={{ color: '#22d3ee' }}>CHEM 5310</p>
-                <p className="text-xs" style={{ color: '#94a3b8' }}>Introduction to Programming for Chemistry</p>
-              </div>
-              <div>
-                <p className="text-xs font-bold" style={{ color: '#22d3ee' }}>CHEM 6V39</p>
-                <p className="text-xs" style={{ color: '#94a3b8' }}>Computational Chemistry &amp; Reaction Mechanisms</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="max-w-5xl mx-auto px-6"><div className="section-divider" /></div>
-
-      {/* ════════ PUBLICATIONS ════════ */}
-      <section id="publications" className="max-w-5xl mx-auto px-6 py-16">
-        <div className="flex items-center gap-3 mb-8">
-          <BookOpen style={{ color: '#22d3ee' }} size={24} />
-          <h3 className="heading-font text-2xl font-bold text-white">Publications</h3>
-        </div>
-
-        <div className="space-y-4">
-          {[
-            {
-              title: 'Self-assembly of a fluorescent virus-like particle for imaging in tissues with high autofluorescence',
-              journal: 'Journal of Materials Chemistry B',
-              year: '2023',
-              doi: '10.1039/d3tb00469d',
-              authors: 'I. Trashi, M. Z. Durbacz, O. Trashi, Y. H. Wijesundara, R. N. Ehrman, A. C. Chiev, F. C. Herbert, J. Gadhvi, N. J. De Nisco, S. O. Nielsen, J. J. Gassensmith',
-            },
-            {
-              title: 'TEMPO-conjugated tobacco mosaic virus as a magnetic resonance imaging contrast agent for detection of superoxide production in the inflamed liver',
-              journal: 'Journal of Materials Chemistry B',
-              year: '2024',
-              doi: '10.1039/d3tb02765a',
-              authors: 'J. L. Lumata, L. M. Hagge, M. A. Gaspar, I. Trashi, R. N. Ehrman, S. Koirala, A. C. Chiev, Y. H. Wijesundara, C. B. Darwin, S. Pena, X. Wen, J. Wansapura, Z. Kovacs, L. L. Lumata, S. O. Nielsen, J. J. Gassensmith',
-            },
-          ].map((pub, i) => (
-            <div key={i} className="p-6 rounded-xl card-hover" style={{
-              background: 'rgba(15,23,42,0.6)',
-              border: '1px solid rgba(148,163,184,0.08)',
-            }}>
-              <h4 className="heading-font text-base font-bold text-white mb-1.5">{pub.title}</h4>
-              <p className="text-xs font-semibold mb-2" style={{ color: '#22d3ee' }}>{pub.journal} ({pub.year})</p>
-              <p className="text-xs mb-3" style={{ color: '#64748b' }}>{pub.authors}</p>
-              <a href={`https://doi.org/${pub.doi}`} target="_blank" rel="noopener noreferrer"
-                 className="inline-flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#22d3ee' }}>
-                DOI: {pub.doi} <ExternalLink size={12} />
-              </a>
-            </div>
-          ))}
-
-          <div className="p-6 rounded-xl" style={{
-            background: 'rgba(15,23,42,0.4)',
-            border: '1px dashed rgba(148,163,184,0.12)',
-          }}>
-            <h4 className="heading-font text-base font-bold text-white mb-1">Alpha-Hemolysin Nanopore Sensing for Amino Acid Detection</h4>
-            <p className="text-xs font-semibold" style={{ color: '#f59e0b' }}>In Preparation</p>
-          </div>
-        </div>
-      </section>
-
-      <div className="max-w-5xl mx-auto px-6"><div className="section-divider" /></div>
-
-      {/* ════════ TEACHING ════════ */}
-      <section id="teaching" className="max-w-5xl mx-auto px-6 py-16">
-        <div className="flex items-center gap-3 mb-8">
-          <Users style={{ color: '#22d3ee' }} size={24} />
-          <h3 className="heading-font text-2xl font-bold text-white">Teaching &amp; Mentoring</h3>
-        </div>
-
-        <div className="space-y-4">
-          <div className="p-6 rounded-xl" style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(148,163,184,0.08)' }}>
-            <h4 className="heading-font text-lg font-bold text-white mb-1">Graduate Teaching Assistant</h4>
-            <p className="text-xs mb-4" style={{ color: '#64748b' }}>University of Texas at Dallas · Aug 2022 – Present</p>
-            <div className="space-y-2.5">
-              {[
-                ['Introductory Quantitative Chemistry Labs', '1.5 years — fostered collaborative, hands-on learning'],
-                ['General Chemistry Instruction', '1 year — lectures, grading, and one-on-one student support'],
-                ['Research Mentoring', 'Guided students in computational methods, MD simulations, and reproducible workflows'],
-              ].map(([title, desc], i) => (
-                <div key={i} className="flex items-start">
-                  <span className="accent-dot" />
-                  <span className="text-sm" style={{ color: '#cbd5e1' }}>
-                    <strong>{title}</strong> — {desc}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ════════ FOOTER ════════ */}
-      <footer style={{ borderTop: '1px solid rgba(148,163,184,0.06)' }} className="mt-12 py-10">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <p className="text-xs" style={{ color: '#64748b' }}>
-            Cary Darwin · Computational Chemistry · UT Dallas
-          </p>
-          <p className="text-xs mt-2" style={{ color: '#475569' }}>
-            <a href="mailto:cxd190027@utdallas.edu" style={{ color: '#22d3ee' }}>cxd190027@utdallas.edu</a>
-            {' · '}
-            <a href="https://github.com/PhaedrusD" target="_blank" rel="noopener noreferrer" style={{ color: '#22d3ee' }}>GitHub</a>
-          </p>
-          <p className="text-xs mt-4" style={{ color: '#334155' }}>© 2026 Cary Darwin</p>
-        </div>
-      </footer>
+<!-- ════════ NAV ════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">Cary Darwin</a>
+    <div class="nav-links">
+      <a href="#work">Work</a>
+      <a href="#education">Education</a>
+      <a href="#publications">Publications</a>
+      <a href="#teaching">Teaching</a>
     </div>
-  );
-}
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- ════════ HERO ════════ -->
+<section class="hero">
+  <div>
+    <div class="hero-label">PhD Candidate · UT Dallas</div>
+    <h2 class="heading">Computational<br>Chemist</h2>
+    <p class="hero-subtitle">Molecular Dynamics · Scientific Software · Virus-Like Particles</p>
+    <p class="hero-desc">Building software that bridges the gap between complex computational pipelines and usable research tools. Created a GUI that reduced VLP simulation preparation time by 90%.</p>
+    <div class="hero-buttons">
+      <a href="https://github.com/PhaedrusD/eviVLP/tree/main" target="_blank" rel="noopener" class="btn btn-cyan">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        GitHub
+      </a>
+      <a href="https://linkedin.com/in/cary-darwin-bb2857a7" target="_blank" rel="noopener" class="btn btn-blue">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn
+      </a>
+      <a href="mailto:cxd190027@utdallas.edu" class="btn btn-ghost">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email
+      </a>
+    </div>
+  </div>
+
+  <div class="qr-wrap">
+    <div class="qr-box">
+      <div id="qr-code"></div>
+    </div>
+    <p class="qr-caption">Scan to view this portfolio on your phone</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════════ FEATURED WORK ════════ -->
+<section class="section" id="work">
+  <div class="section-header">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    <h3 class="heading">Featured Work</h3>
+  </div>
+
+  <div class="grid-2">
+    <!-- GUI Project -->
+    <div class="card">
+      <div class="card-title">eviVLP — Simulation GUI</div>
+      <p class="card-text" style="margin: 0.5rem 0 0.75rem;">C++ wxWidgets application orchestrating multi-step computational chemistry pipelines. Integrates VMD, psfgen, CGenFF, and NAMD with an interactive 3D OpenGL molecule viewer featuring atom-picking.</p>
+      <p class="card-meta" style="font-size: 0.75rem;"><strong>Impact:</strong> 90% reduction in simulation prep time</p>
+      <p class="card-meta" style="font-size: 0.75rem; margin-bottom: 0.5rem;"><strong>Features:</strong> Automated parameterization, template processing, click-based atom selection</p>
+      <div class="tags">
+        <span class="tag">C++</span>
+        <span class="tag">wxWidgets</span>
+        <span class="tag">OpenGL</span>
+        <span class="tag">NAMD</span>
+        <span class="tag">VMD</span>
+      </div>
+      <div style="margin-top: 0.75rem;">
+        <a href="https://github.com/PhaedrusD/eviVLP/tree/main" target="_blank" rel="noopener" class="link-cyan">
+          View Repository
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Research Focus -->
+    <div class="card" style="border-color: rgba(148,163,184,0.06);">
+      <div class="card-title">Research Focus</div>
+      <div style="margin-top: 0.75rem;" class="stack" style="gap: 0.6rem;">
+        <div class="bullet-item"><span class="bullet-dot"></span><span>Molecular dynamics using CHARMM36/CGenFF force fields</span></div>
+        <div class="bullet-item"><span class="bullet-dot"></span><span>Novel amino acid parameterization with QM software</span></div>
+        <div class="bullet-item"><span class="bullet-dot"></span><span>Virus-like particle (VLP) capsid design for therapeutics</span></div>
+        <div class="bullet-item"><span class="bullet-dot"></span><span>Alpha-Hemolysin nanopore sensing systems</span></div>
+        <div class="bullet-item"><span class="bullet-dot"></span><span>Coat protein modification &amp; novel residue generation</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ TECH STACK ════════ -->
+<section style="padding-bottom: 3rem;">
+  <div class="section-sub-header heading">Technical Expertise</div>
+  <div class="grid-3">
+    <div class="card-subtle">
+      <div class="card-meta" style="margin-bottom: 0.4rem;">Programming</div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">C++, Python, TCL — scientific computation, GUI development (wxWidgets), and workflow automation.</p>
+    </div>
+    <div class="card-subtle">
+      <div class="card-meta" style="margin-bottom: 0.4rem;">Computational Tools</div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">CHARMM, NAMD, VMD, psfgen, CGenFF, ORCA, Q-Chem for quantum mechanical parameterization.</p>
+    </div>
+    <div class="card-subtle">
+      <div class="card-meta" style="margin-bottom: 0.4rem;">Specializations</div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">Molecular dynamics, force field development, scientific visualization, software architecture.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════════ EDUCATION ════════ -->
+<section class="section" id="education">
+  <div class="section-header">
+    <h3 class="heading">Education</h3>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.15rem;">
+        <div class="card-title">PhD in Chemistry</div>
+        <span class="card-meta">Expected 2026</span>
+      </div>
+      <p class="card-meta-muted" style="margin-bottom: 0.4rem;">University of Texas at Dallas — Gassensmith Lab</p>
+      <p class="card-text">Computational chemistry, molecular dynamics simulations, virus-like particle engineering, and scientific software development.</p>
+    </div>
+
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div class="card-title">Bachelor of Science in Biochemistry</div>
+        <span class="card-meta">2022</span>
+      </div>
+      <p class="card-meta-muted">University of Texas at Dallas</p>
+    </div>
+
+    <div class="card-subtle">
+      <div class="card-title" style="font-size: 0.9rem; margin-bottom: 0.65rem;">Relevant Coursework</div>
+      <div class="grid-2">
+        <div>
+          <p class="card-meta" style="font-size: 0.75rem;">CHEM 5310</p>
+          <p style="font-size: 0.8rem; color: var(--text-secondary);">Introduction to Programming for Chemistry</p>
+        </div>
+        <div>
+          <p class="card-meta" style="font-size: 0.75rem;">CHEM 6V39</p>
+          <p style="font-size: 0.8rem; color: var(--text-secondary);">Computational Chemistry &amp; Reaction Mechanisms</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════════ PUBLICATIONS ════════ -->
+<section class="section" id="publications">
+  <div class="section-header">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <h3 class="heading">Publications</h3>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-title">Self-assembly of a fluorescent virus-like particle for imaging in tissues with high autofluorescence</div>
+      <p class="card-meta" style="margin: 0.25rem 0 0.4rem;">Journal of Materials Chemistry B (2023)</p>
+      <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.6rem;">I. Trashi, M. Z. Durbacz, O. Trashi, Y. H. Wijesundara, R. N. Ehrman, A. C. Chiev, F. C. Herbert, J. Gadhvi, N. J. De Nisco, S. O. Nielsen, J. J. Gassensmith</p>
+      <a href="https://doi.org/10.1039/d3tb00469d" target="_blank" rel="noopener" class="link-cyan" style="font-size: 0.78rem;">
+        DOI: 10.1039/d3tb00469d
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+
+    <div class="card">
+      <div class="card-title">TEMPO-conjugated tobacco mosaic virus as a magnetic resonance imaging contrast agent for detection of superoxide production in the inflamed liver</div>
+      <p class="card-meta" style="margin: 0.25rem 0 0.4rem;">Journal of Materials Chemistry B (2024)</p>
+      <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.6rem;">J. L. Lumata, L. M. Hagge, M. A. Gaspar, I. Trashi, R. N. Ehrman, S. Koirala, A. C. Chiev, Y. H. Wijesundara, C. B. Darwin, S. Pena, X. Wen, J. Wansapura, Z. Kovacs, L. L. Lumata, S. O. Nielsen, J. J. Gassensmith</p>
+      <a href="https://doi.org/10.1039/d3tb02765a" target="_blank" rel="noopener" class="link-cyan" style="font-size: 0.78rem;">
+        DOI: 10.1039/d3tb02765a
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+
+    <div class="card-dashed">
+      <div class="card-title">Alpha-Hemolysin Nanopore Sensing for Amino Acid Detection</div>
+      <p style="font-size: 0.78rem; font-weight: 600; color: var(--amber); margin-top: 0.2rem;">In Preparation</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ════════ TEACHING ════════ -->
+<section class="section" id="teaching">
+  <div class="section-header">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <h3 class="heading">Teaching &amp; Mentoring</h3>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="font-size: 1.05rem;">Graduate Teaching Assistant</div>
+    <p class="card-meta-muted" style="margin-bottom: 0.75rem;">University of Texas at Dallas · Aug 2022 – Present</p>
+    <div style="display: flex; flex-direction: column; gap: 0.55rem;">
+      <div class="bullet-item"><span class="bullet-dot"></span><span><strong>Introductory Quantitative Chemistry Labs</strong> — 1.5 years; fostered collaborative, hands-on learning</span></div>
+      <div class="bullet-item"><span class="bullet-dot"></span><span><strong>General Chemistry Instruction</strong> — 1 year; lectures, grading, and one-on-one student support</span></div>
+      <div class="bullet-item"><span class="bullet-dot"></span><span><strong>Research Mentoring</strong> — Guided students in computational methods, MD simulations, and reproducible workflows</span></div>
+    </div>
+  </div>
+</section>
+
+</div><!-- .container -->
+
+<!-- ════════ FOOTER ════════ -->
+<footer class="footer">
+  <div class="container">
+    <p>Cary Darwin · Computational Chemistry · UT Dallas</p>
+    <p style="margin-top: 0.4rem;">
+      <a href="mailto:cxd190027@utdallas.edu">cxd190027@utdallas.edu</a> ·
+      <a href="https://github.com/PhaedrusD" target="_blank" rel="noopener">GitHub</a>
+    </p>
+    <p class="faint">© 2026 Cary Darwin</p>
+  </div>
+</footer>
+
+<!-- QR Code Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  // ── Smooth scroll for nav links ──
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.addEventListener('click', e => {
+      const href = a.getAttribute('href');
+      if (href.startsWith('#')) {
+        e.preventDefault();
+        document.querySelector(href)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // ── Active nav highlight on scroll ──
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (s.id && window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+
+  // ── Generate QR code on load ──
+  window.addEventListener('DOMContentLoaded', () => {
+    new QRCode(document.getElementById('qr-code'), {
+      text: 'https://phaedrusd.github.io',
+      width: 180,
+      height: 180,
+      colorDark: '#0e1628',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H,
+    });
+  });
+</script>
+
+</body>
+</html>
